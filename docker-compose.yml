@@ -1,19 +1,18 @@
-version: '3.8'  # современная версия схемы Compose
+version: '3.8'
 
 services:
+  #Сбор и хранение метрик
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro   # твой конфиг
-      - prometheus:/prometheus                          # volume для метрик
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
     networks:
       - monitoring
-    # не обязательно, но можно указать команду для дополнительных флагов
-    # command: --config.file=/etc/prometheus/prometheus.yml
-
+  #Экспорт метрик
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
@@ -23,32 +22,58 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
-    # Переопределяем команду, чтобы указать, где искать системные файлы
     command:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
     networks:
       - monitoring
-
+  #Визуализация метрик и логов
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
       - "3000:3000"
     volumes:
-      - grafana:/var/lib/grafana   # чтобы дашборды и настройки не терялись
+      - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=passwd   # сразу задай пароль или убери, будет admin/admin
     networks:
       - monitoring
+  #Хранилище логов
+  loki:
+    image: grafana/loki:2.9.10
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./configs/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/loki-config.yml
+    networks:
+      - monitoring
+ #Сбор логов контейнеров
+  promtail:
+    image: grafana/promtail:2.9.10
+    container_name: promtail
+    ports:
+      - "9080:9080"
+    volumes:
+      - ./configs/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/var/log:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - monitoring
 
 volumes:
-  prometheus:   # будут созданы автоматически
-  grafana:
+  prometheus_data:   # будут созданы автоматически
+  grafana_data:
+  loki_data:
 
 networks:
-  monitoring:        # явно определяем сеть, как мы делали раньше
+  monitoring:
     driver: bridge
