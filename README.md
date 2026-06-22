@@ -11,12 +11,12 @@
 ## Быстрый старт
 1. Убедитесь, что установлен Docker и плагин Compose.
 2. Клонируйте репозиторий:
-   ```
+   ```bash
    git clone <url-твоего-репозитория>
    cd monitoring
    ```
 3. Запустите стек:
-   ```
+   ```bash
    docker compose up -d
    ```
 4. Откройте:
@@ -29,6 +29,6 @@
 - Grafana provisioning описан в grafana/provisioning/.
 
 ## Остановка
-   ```
+   ```bash
    docker compose down
    ```
