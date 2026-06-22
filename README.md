@@ -11,12 +11,14 @@
 ## Быстрый старт
 1. Убедитесь, что установлен Docker и плагин Compose.
 2. Клонируйте репозиторий:
-   ```bash
+   ```
    git clone <url-твоего-репозитория>
-   cd monitoring```
+   cd monitoring
+   ```
 3. Запустите стек:
-   ``` bash
-   docker compose up -d```
+   ```
+   docker compose up -d
+   ```
 4. Откройте:
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000 (логин admin, пароль задаётся в compose файле)
@@ -27,5 +29,6 @@
 - Grafana provisioning описан в grafana/provisioning/.
 
 ## Остановка
-   ```bash
-   docker compose down```
+   ```
+   docker compose down
+   ```
