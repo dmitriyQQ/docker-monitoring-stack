@@ -1,0 +1,54 @@
+version: '3.8'  # современная версия схемы Compose
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro   # твой конфиг
+      - prometheus:/prometheus                          # volume для метрик
+    networks:
+      - monitoring
+    # не обязательно, но можно указать команду для дополнительных флагов
+    # command: --config.file=/etc/prometheus/prometheus.yml
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    # Переопределяем команду, чтобы указать, где искать системные файлы
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana:/var/lib/grafana   # чтобы дашборды и настройки не терялись
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=passwd   # сразу задай пароль или убери, будет admin/admin
+    networks:
+      - monitoring
+
+volumes:
+  prometheus:   # будут созданы автоматически
+  grafana:
+
+networks:
+  monitoring:        # явно определяем сеть, как мы делали раньше
+    driver: bridge

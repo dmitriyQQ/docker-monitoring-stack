@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: 'default'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10    # как часто проверять изменения в JSON
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards   # путь внутри контейнера к папке с JSON

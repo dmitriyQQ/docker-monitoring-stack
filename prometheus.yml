@@ -1,0 +1,19 @@
+global:
+  # Параметры по умолчанию для всех задач сбора метрик
+  scrape_interval: 15s     # Как часто опрашивать цели
+  evaluation_interval: 15s # Как часто пересчитывать правила алертов (если будут)
+
+# Секция с описанием источников метрик
+scrape_configs:
+  # Первая задача: сам Prometheus (следим за собой)
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']  # внутри контейнера Prometheus
+
+  # Вторая задача: наш Node Exporter
+  - job_name: 'node_exporter'
+    # Если целей несколько, можно перечислить
+    static_configs:
+      - targets: ['node-exporter:9100']   # нужно заменить на реальное
+        # например: 'node-exporter:9100'
+        # можно добавить несколько адресов, если экспортеров много
